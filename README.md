@@ -1,2 +1,2 @@
-# eignwell
+# eigenwell
 finite difference based eigensolving
