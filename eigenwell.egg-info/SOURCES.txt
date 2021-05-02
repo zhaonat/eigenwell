@@ -1,0 +1,8 @@
+setup.py
+eigenwell.egg-info/PKG-INFO
+eigenwell.egg-info/SOURCES.txt
+eigenwell.egg-info/dependency_links.txt
+eigenwell.egg-info/requires.txt
+eigenwell.egg-info/top_level.txt
+test/test_derivative.py
+test/test_eigen_1d.py
