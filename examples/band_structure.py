@@ -5,13 +5,12 @@ print(sys.path)
 from eigenwell.src import grid, eigen_k, eigen_w
 from eigenwell.src.constants import *
 import multiprocessing
+from itertools import product
 
 '''
     use multiprocessing to enhance speed
 '''
 
-def compute_spectra():
-    return;
 
 if __name__ == '__main__':
 
@@ -50,10 +49,17 @@ if __name__ == '__main__':
     wvlen_scan = np.linspace(1,10,60);
     wvlen_scan = np.logspace(np.log10(1), np.log10(10),200)
     spectra = [];
-    for c,wvlen in enumerate(wvlen_scan):
-        omega = 2*np.pi*C0/(wvlen);
-        eigvals, eigvecs = eigk.eigensolve(omega, Ky, num_modes = 3)
-        spectra.append(eigvals);
-        if(c%5 == 0):
-            print(c, wvlen)
-    spectra = np.array(spectra)
+
+    nprocesses = 32
+    with multiprocessing.Pool(10) as p:
+        results = p.starmap(eigk.eigensolve, ((wvlen_scan[i], 0) for i in range(32)));
+    print(results)
+    # for c,wvlen in enumerate(wvlen_scan):
+    #     omega = 2*np.pi*C0/(wvlen);
+    #
+    #
+    #     eigvals, eigvecs = eigk.eigensolve(omega, Ky, num_modes = 3)
+    #     spectra.append(eigvals);
+    #     if(c%5 == 0):
+    #         print(c, wvlen)
+    spectra = np.array(results)
