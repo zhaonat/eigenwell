@@ -71,12 +71,14 @@ class EigenK2D(Eigen):
 
         Epxx = self.grid_average(self.eps_r, 'x');
         Epyy = self.grid_average(self.eps_r, 'y');
+        Tepxx = sp.spdiags(1 / Epxx.flatten(), 0, self.M,self.M)
+        Tepyy = sp.spdiags(1 / Epyy.flatten(), 0, self.M,self.M)
 
         self.invTepzz = sp.spdiags(1 / self.eps_r.flatten(), 0, self.M,self.M)
         if(self.polarization == 'TM'):
             self.Mop = self.invTepzz;
             self.Cop = -self.invTepzz@(-1j * (self.grid.Dxf + self.grid.Dxb));
-            self.Kop = -self.invTepzz@(self.grid.Dxf @ self.grid.Dxb) #- omega**2*mu0*eps0*I;
+            self.Kop = self.invTepzz@(-self.grid.Dxf @ self.grid.Dxb - self.grid.Dyf @ self.grid.Dyb)# - 1j*((Dyf + Dyb))*Ky + Ky**2*I) ;
 
         elif(self.polarization == 'TE'):
             self.Kop = self.invTepzz@(-self.grid.Dxf @ self.grid.Dxb - self.grid.Dyf @ self.grid.Dyb)# - 1j*((Dyf + Dyb))*Ky + Ky**2*I) ;
