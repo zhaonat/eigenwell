@@ -30,6 +30,8 @@ In this eigenproblem, we are looking modes perpendicular to the surface of the 1
 ### 2D Photonic Crystal
 
 ## 3D Waveguide Problem
+
+Example below is a metal conductor waveguide.
 ![Alt text](./img/conductor_3D_waveguide.png?raw=true "Title")
 
 
