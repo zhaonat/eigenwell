@@ -48,8 +48,11 @@ class EigenK1D(Eigen):
         OA = sp.bmat([[self.Cop, K_omega],[-I, None]]);
         self.OA = OA;
         self.OB = OB;
-        D = bslash(self.OB, self.OA);
-        eigenvals, eigenmodes = sp.linalg.eigs(D, k=num_modes, sigma = sigma)
+
+        eigenvals, eigenmodes = sp.linalg.eigs(self.OA, M = self.OB, k=num_modes, sigma = sigma)
+
+        # D = bslash(self.OB, self.OA);
+        # eigenvals, eigenmodes = sp.linalg.eigs(D, k=num_modes, sigma = sigma)
         return eigenvals, eigenmodes;
 
 class EigenK2D(Eigen):
@@ -99,7 +102,11 @@ class EigenK2D(Eigen):
         OA = sp.bmat([[self.Cop, K_omega],[-I, None]]);
         self.OA = OA;
         self.OB = OB;
-        D = bslash(self.OB, self.OA);
-        eigenvals, eigenmodes = sp.linalg.eigs(D, k=num_modes, sigma = sigma)
+
+        # solve generalized eigenvalue problem instead
+        eigenvals, eigenmodes = sp.linalg.eigs(self.OA, M = self.OB, k=num_modes, sigma = sigma)
+
+        # D = bslash(self.OB, self.OA);
+        # eigenvals, eigenmodes = sp.linalg.eigs(D, k=num_modes, sigma = sigma)
 
         return eigenvals, eigenmodes;

@@ -72,7 +72,6 @@ class EigenOmega2D(Eigen):
             avg_array = (center_shifted+center_array)/2
             return avg_array
         Epxx = grid_average(self.eps_r, 'x');
-
         invTepxx = sp.spdiags(1/(EPSILON0*self.eps_r.flatten()), 0, self.M, self.M)
         Tepzz = sp.spdiags(EPSILON0*self.eps_r.flatten(), 0, self.M, self.M)
 

@@ -64,7 +64,11 @@ class FiniteDifference():
             self.Dxb = PML.Sxb@self.createDws('x', 'b');
             self.Dyb = PML.Syb@self.createDws('y', 'b');
         if(PEC_PMC):
-            return;
+
+            self.Dxf = PEC_PMC.mask_x@self.createDws('x', 'f')@PEC_PMC.mask_x;
+            self.Dyf = PEC_PMC.mask_y@self.createDws('y', 'f')@PEC_PMC.mask_y;
+            self.Dxb = PEC_PMC.mask_x@self.createDws('x', 'b')@PEC_PMC.mask_x;
+            self.Dyb = PEC_PMC.mask_y@self.createDws('y', 'b')@PEC_PMC.mask_y;
 
         if(not PML and not PEC_PMC):
             self.Dxf = self.createDws('x', 'f');

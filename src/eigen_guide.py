@@ -54,14 +54,38 @@ class EigenGuide3D(Eigen):
         grid: grid object storing the derivative operators
     '''
 
-    def __init__(self, structure, grid, polarization = 'TE'):
+    def __init__(self, eps_r, grid):
 
         super().__init__(structure, grid);
         self.make_operator_components();
         return;
 
-    def eigensolve():
-        pass
+    def eigensolve(sigma = 0, num_modes = 10):
+        ksqr, modes = la.eigs(self.A, k=num_modes, sigma = sigma)
+        return ksqr, modes;
 
     def make_operator_components():
-        pass
+        ## generate operator
+
+        epxx= grid_average(epsilon,'x')
+        epyy = grid_average(epsilon, 'y')
+
+        Tez = sp.diags(EPSILON0*epsilon.flatten(), 0, (M,M))
+        Tey = sp.diags(EPSILON0*epyy.flatten(), 0, (M,M))
+        Tex = sp.diags(EPSILON0*epxx.flatten(), 0,(M,M))
+        invTez = sp.diags(1/(EPSILON0*epsilon.flatten()), 0, (M,M))
+
+        Dop1 = sp.bmat([[-sel.grid.Dyf], [self.grid.Dxf]])
+        print(Dop1.shape)
+
+        Dop2 = sp.bmat([[-self.grid.Dyb,self.grid.Dxb]])
+
+        Dop3 = sp.bmat([[self.grid.Dxb], [self.grid.Dyb]])
+
+        Dop4 = sp.bmat([[self.grid.Dxf,self.grid.Dyf]])
+
+        Tep = sp.block_diag((Tey, Tex))
+
+
+        A = omega**2*MU0*Tep + Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4
+        self.A = A;
