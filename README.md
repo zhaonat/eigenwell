@@ -12,6 +12,7 @@ In this type of problem, there is no resolution of the wavevector k, we only sol
 ### Classic Dielectric Waveguide
 
 ## omega to k eigenproblem
+In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap.
 
 ### 1D Bragg Mirror
 In this eigenproblem, we are looking modes perpendicular to the surface of the 1D Bragg Mirror
