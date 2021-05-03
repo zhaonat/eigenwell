@@ -7,8 +7,14 @@ Plane wave expansion is based on breaking the problem into the Fourier domain. A
 The code in eigenwell implements everything using
 
 ## omega eigenproblem
+In this type of problem, there is no resolution of the wavevector k, we only solve for the eigenvalue $\omega$. For example, the modes of a waveguide.
+
+### Classic Dielectric Waveguide
 
 ## omega to k eigenproblem
+
+### 1D Bragg Mirror
+In this eigenproblem, we are looking modes perpendicular to the surface of the 1D Bragg Mirror
 
 ### insulator-metal-insulator example
 <img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1"> add text
