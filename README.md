@@ -15,8 +15,9 @@ The code in eigenwell implements everything using
 
 ![Alt text](./img/IMI_band_structure.png?raw=true "Title")
 
+### 2D Photonic Crystal
 
-## k to omega eigenproblem
+## 3D Waveguide Problem
 
 # Examples
 these contain python scripts meant to be run from the command line (vs the Jupyter notebooks). Among these are parallel implementations for obtaining bandsolvers using python's multiprocessing module
