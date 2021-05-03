@@ -12,7 +12,7 @@ class FiniteDifference():
         which may differ if it's a k to omega or omega to k solve
         A = dxf*dxb+dyf*dyb+omega^2 (mu_0, eps_r)
     '''
-    def __init__(self, dL,N):
+    def __init__(self, dL,N, PML = None, PEC_PMC = None):
         '''
             for 1d, use N = [Nx,1]
             dL: [dx, dy] discretization
@@ -23,7 +23,7 @@ class FiniteDifference():
         assert 0 not in dL and 0 not in N, 'do not make anything 0 in dL or N'
         self.dL = dL;
         self.N = N;
-        self.make_derivatives();
+        self.make_derivatives(PML=PML, PEC_PMC = PEC_PMC);
         return;
 
     def createDws(self, s, f):
