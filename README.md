@@ -16,6 +16,9 @@ In this type of problem, there is no resolution of the wavevector k, we only sol
 ### 1D Bragg Mirror
 In this eigenproblem, we are looking modes perpendicular to the surface of the 1D Bragg Mirror
 
+![Alt text](./img/bragg_mirror.png?raw=true "Title")
+
+
 ### insulator-metal-insulator example
 <img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1"> add text
 
