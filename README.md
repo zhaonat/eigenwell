@@ -11,3 +11,10 @@ The code in eigenwell implements everything using
 ## omega to k eigenproblem
 
 ## k to omega eigenproblem
+
+# Examples
+these contain python scripts meant to be run from the command line (vs the Jupyter notebooks). Among these are parallel implementations for obtaining bandsolvers using python's multiprocessing module
+
+# Notebooks
+A more visual and intuitive introduction to the functionalities of the FD eigensolves
+
