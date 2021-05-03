@@ -10,6 +10,12 @@ The code in eigenwell implements everything using
 
 ## omega to k eigenproblem
 
+### insulator-metal-insulator example
+<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1"> add text
+
+![Alt text](./img/IMI_band_structure.png?raw=true "Title")
+
+
 ## k to omega eigenproblem
 
 # Examples
