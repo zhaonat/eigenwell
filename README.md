@@ -3,6 +3,8 @@ finite difference based eigensolving. Eigensolving is more nuanced than it initi
 
 Plane wave expansion is based on breaking the problem into the Fourier domain. As a result, you cannot solve for the eigenvalue of k given $\omega$
 
+There are some references including analytic solutions to some example problems and some simple pwe code in 1D in the notebooks section as well for comparison.
+
 ### Conventions
 The code in eigenwell implements everything using
 
