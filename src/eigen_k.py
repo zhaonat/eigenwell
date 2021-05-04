@@ -6,6 +6,7 @@ class EigenK1D(Eigen):
     '''
         eps_r: numpy array of the structure
         grid: grid object storing the derivative operators
+        axis is in x direction
     '''
 
     def __init__(self, structure, grid, polarization = 'TE'):
@@ -71,14 +72,14 @@ class EigenK2D(Eigen):
 
         Epxx = self.grid_average(self.eps_r, 'x');
         Epyy = self.grid_average(self.eps_r, 'y');
-        Tepxx = sp.spdiags(1 / Epxx.flatten(), 0, self.M,self.M)
-        Tepyy = sp.spdiags(1 / Epyy.flatten(), 0, self.M,self.M)
+        invTepxx = sp.spdiags(1 / Epxx.flatten(), 0, self.M,self.M)
+        invTepyy = sp.spdiags(1 / Epyy.flatten(), 0, self.M,self.M)
 
         self.invTepzz = sp.spdiags(1 / self.eps_r.flatten(), 0, self.M,self.M)
         if(self.polarization == 'TM'):
             self.Mop = self.invTepzz;
-            self.Cop = -self.invTepzz@(-1j * (self.grid.Dxf + self.grid.Dxb));
-            self.Kop = self.invTepzz@(-self.grid.Dxf @ self.grid.Dxb - self.grid.Dyf @ self.grid.Dyb)# - 1j*((Dyf + Dyb))*Ky + Ky**2*I) ;
+            self.Cop = -(-1j * (self.grid.Dxf + self.grid.Dxb));
+            self.Kop = (-self.grid.Dxf @ invTepxx@ self.grid.Dxb - self.grid.Dyf @ invTepyy@self.grid.Dyb)# - 1j*((Dyf + Dyb))*Ky + Ky**2*I) ;
 
         elif(self.polarization == 'TE'):
             self.Kop = self.invTepzz@(-self.grid.Dxf @ self.grid.Dxb - self.grid.Dyf @ self.grid.Dyb)# - 1j*((Dyf + Dyb))*Ky + Ky**2*I) ;

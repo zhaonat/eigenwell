@@ -53,7 +53,7 @@ class EigenOmega1D(Eigen):
 
 
 class EigenOmega2D(Eigen):
-    def __init__(self, eps_r, grid, mode = 'TE'):
+    def __init__(self, eps_r, grid, polarization = 'TE'):
 
         super().__init__(eps_r, grid);
         self.polarization = mode;
@@ -71,15 +71,20 @@ class EigenOmega2D(Eigen):
             center_shifted = np.roll(center_array, 1, axis=xy[w])
             avg_array = (center_shifted+center_array)/2
             return avg_array
+
         Epxx = grid_average(self.eps_r, 'x');
-        invTepxx = sp.spdiags(1/(EPSILON0*self.eps_r.flatten()), 0, self.M, self.M)
+        Epyy = grid_average(self.eps_r, 'x');
+        invTepxx = sp.spdiags(1/(EPSILON0*Epxx.flatten()), 0, self.M, self.M)
+        invTepyy = sp.spdiags(1/(EPSILON0*Epyy.flatten()), 0, self.M, self.M)
+
         Tepzz = sp.spdiags(EPSILON0*self.eps_r.flatten(), 0, self.M, self.M)
 
         if(mode == 'TE'):
             A = -(1/MU0)*invTepxx@(self.grid.Dxf@self.grid.Dxb+ self.grid.Dyf@self.grid.Dyb)
         else:
-            A = self.grid.Dxf@invTepxx@self.grid.Dxb
+            A = -(1/MU0)*(self.grid.Dxf)@(invTepxx)@(self.grid.Dxb) + (self.grid.Dyf)@(invTepyy)@(self.grid.Dyb)
         self.A = A;
+
 
     def eigensolve(self, num_modes = 10, sigma = 0):
         '''

@@ -6,17 +6,8 @@ from .constants import *
 import numpy as np
 import scipy.sparse as sp
 
-class BoundaryCondition:
-    '''
-        not sure for now whether a parent class is reasonable
-    '''
-    def __init__(self, wrange, Nw, Nw_pml):
-        return;
 
-    def generate_mask():
-        pass;
-
-class PEC_PMC(BoundaryCondition):
+class PEC_PMC():
     def __init__(self,N):
         self.N = N
         self.generate_mask();
