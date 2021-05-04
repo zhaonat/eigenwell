@@ -40,3 +40,4 @@ these contain python scripts meant to be run from the command line (vs the Jupyt
 
 ## Current Problems
 1. Implementing PMLs and PECs in a universal way across all eigensolvers.
+2. Ordering of n>1 dimensional numpy arrays is not the same as MatLab during reshape or flatten operations
