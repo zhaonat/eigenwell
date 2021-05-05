@@ -18,7 +18,9 @@ class EigenK1D(Eigen):
         return;
 
     def make_operator_components(self, omega):
-
+        '''
+            solves for Kx eigenvalue, Ky can be added in using bloch
+        '''
         M = self.structure.M;
         N = self.structure.N;
         Dxf = self.grid.Dxf; Dyf = self.grid.Dyf;
@@ -43,11 +45,11 @@ class EigenK2D(Eigen):
         I'm beginning to think that eigen classes should not have a solver interface
 
     '''
-    def __init__(self, structure, grid, polarization = 'TE'):
+    def __init__(self, structure, grid, omega = 0, polarization = 'TE'):
 
         super().__init__(structure, grid);
         self.polarization = polarization
-        self.make_operator_components();
+        self.make_operator_components(omega);
 
         return;
 
@@ -58,9 +60,14 @@ class EigenK2D(Eigen):
         Dxf = self.grid.Dxf; Dyf = self.grid.Dyf;
         Dxb = self.grid.Dxb; Dyb = self.grid.Dyb;
         I = sp.identity(M);
-        invTepxx = sp.spdiags(1 / Epxx.flatten(), 0, M,M)
-        invTepyy = sp.spdiags(1 / Epyy.flatten(), 0, M,M)
-        invTepzz = sp.spdiags(1 / self.eps_r.flatten(), 0, M,M)
+
+        Epxx = np.reshape(self.structure.epxx, (M,), order = 'F')
+        Epyy = np.reshape(self.structure.epyy, (M,), order = 'F');
+        Epzz = np.reshape(self.structure.eps_r, (M,), order = 'F');
+
+        invTepxx = sp.spdiags(1 / Epxx, 0, M,M)
+        invTepyy = sp.spdiags(1 / Epyy, 0, M,M)
+        invTepzz = sp.spdiags(1 / Epzz, 0, M,M)
 
         if(self.polarization == 'TM'):
             self.Mop = invTepxx;
@@ -85,7 +92,7 @@ class EigenK2D(Eigen):
         '''
         self.Kop = self.Kpart+omega**2*sp.identity(self.structure.M)
         OB = sp.bmat([[self.Mop, None],[None, I]]);
-        OA = sp.bmat([[self.Cop, K_omega],[-I, None]]);
+        OA = sp.bmat([[self.Cop, Kop],[-I, None]]);
         self.OA = OA;
         self.OB = OB;
 

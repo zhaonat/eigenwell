@@ -11,7 +11,7 @@ class Filter:
     def mode_filter():
         return
 
-        
+
 # function [filtered_modes, filtered_eigs, mask] = ...
 #     mode_filtering(eigenmodes, eigenvals, ...
 #     structure_xbounds, structure_ybounds, L, Npml, pml_threshold)
