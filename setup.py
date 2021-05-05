@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(name='eigenwell',
       version='1.0',
       py_modules=['eigenwell'],
-      install_requires=['numpy', 'scipy', 'matplotlib'],
+      install_requires=['numpy', 'scipy', 'matplotlib', 'plotly'],
       author_email='nzz2102@stanford.edu.com'
       )
 

@@ -6,17 +6,8 @@ from .constants import *
 import numpy as np
 import scipy.sparse as sp
 
-class BoundaryCondition:
-    '''
-        not sure for now whether a parent class is reasonable
-    '''
-    def __init__(self, wrange, Nw, Nw_pml):
-        return;
 
-    def generate_mask():
-        pass;
-
-class PEC_PMC(BoundaryCondition):
+class PEC_PMC():
     def __init__(self,N):
         self.N = N
         self.generate_mask();
@@ -26,8 +17,10 @@ class PEC_PMC(BoundaryCondition):
 
         xn = list(range(self.N[0]));
         yn = list(range(self.N[1]));
-        [Xn,Yn] = np.meshgrid(xn,yn);
 
+        ## ordering should be 'F' contiguous
+        [Xn,Yn] = np.meshgrid(xn,yn, indexing = 'ij');
+        M = np.prod(self.N)
         maskx = np.ones(self.N);
         maskx[Xn == 0] = 0;
         maskx[Xn == self.N[0]-1] =0;
@@ -36,5 +29,7 @@ class PEC_PMC(BoundaryCondition):
         masky[Yn == 0] = 0;
         masky[Yn == self.N[1]-1] =0;
 
-        self.mask_x = sp.diags(maskx.flatten(), 0);
-        self.mask_y = sp.diags(masky.flatten(), 0);
+        mx = np.reshape(maskx, (M,),order = 'F')
+        my = np.reshape(masky, (M,),order = 'F')
+        self.mask_x = sp.diags(mx, 0);
+        self.mask_y = sp.diags(my, 0);

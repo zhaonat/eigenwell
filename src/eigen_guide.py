@@ -60,44 +60,42 @@ class EigenGuide3D(Eigen):
         self.make_operator_components();
         return;
 
-    def eigensolve(self, omega, sigma = 0, num_modes = 10):
-        Tep = sp.block_diag((self.Tey, self.Tex))
-
-        A = self.A + omega**2*MU0*Tep;
-        #omega**2*MU0*Tep + Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4
-
-        ksqr, modes = la.eigs(A, k=num_modes, sigma = sigma)
-        return ksqr, modes;
-
-    def make_operator_components(self):
-        ## generate operator
-        def grid_average(center_array, w):
-            '''
-                center_array, 1d eps_r
-            '''
-            # computes values at cell edges
-
-            xy = {'x': 0, 'y': 1}
-            center_shifted = np.roll(center_array, 1, axis=xy[w])
-            avg_array = (center_shifted+center_array)/2
-            return avg_array
+    def make_operator_components(self, omega):
+        '''
+            return a function that is a function of omega?
+        '''
 
         epsilon = self.eps_r;
         epxx= grid_average(epsilon,'x')
         epyy = grid_average(epsilon, 'y')
 
         Tez = sp.diags(EPSILON0*epsilon.flatten(), 0, (self.M,self.M))
-        self.Tey = sp.diags(EPSILON0*epyy.flatten(), 0,  (self.M,self.M))
-        self.Tex = sp.diags(EPSILON0*epxx.flatten(), 0, (self.M,self.M))
+        Tey = sp.diags(EPSILON0*epyy.flatten(), 0,  (self.M,self.M))
+        Tex = sp.diags(EPSILON0*epxx.flatten(), 0, (self.M,self.M))
+
         invTez = sp.diags(1/(EPSILON0*epsilon.flatten()), 0,  (self.M,self.M))
 
-        Dop1 = sp.bmat([[-self.grid.Dyf], [self.grid.Dxf]])
+        Dop1 = sp.bmat([[-Dyf], [Dxf]])
+        Dop2 = sp.bmat([[-Dyb,Dxb]])
+        Dop3 = sp.bmat([[Dxb], [Dyb]])
+        Dop4 = sp.bmat([[Dxf,Dyf]])
 
-        Dop2 = sp.bmat([[-self.grid.Dyb,self.grid.Dxb]])
-
-        Dop3 = sp.bmat([[self.grid.Dxb], [self.grid.Dyb]])
-
-        Dop4 = sp.bmat([[self.grid.Dxf,self.grid.Dyf]])
-        Tep = sp.block_diag((self.Tey, self.Tex))
-
+        Tep = sp.block_diag((Tey, Tex))
         self.A =  Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4;
+
+    def update_operator(self.omega):
+
+        Tey = sp.diags(EPSILON0*epyy.flatten(), 0,  (self.M,self.M))
+        Tex = sp.diags(EPSILON0*epxx.flatten(), 0, (self.M,self.M))
+        Tep = sp.block_diag((Tey, Tex))
+
+        return self.A + omega**2*MU0*Tep;
+
+    # def eigensolve(self, omega, sigma = 0, num_modes = 10):
+    #     Tep = sp.block_diag((self.Tey, self.Tex))
+    #
+    #     A = self.A + omega**2*MU0*Tep;
+    #     #omega**2*MU0*Tep + Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4
+    #
+    #     ksqr, modes = la.eigs(A, k=num_modes, sigma = sigma)
+    #     return ksqr, modes;
