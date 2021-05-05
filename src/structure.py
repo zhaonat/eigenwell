@@ -1,6 +1,10 @@
 import numpy as np
 
 class Structure():
+    '''
+        primarily acts as a struct to store all the spatial dimensional info
+        for the simulation
+    '''
     def __init__(self,eps_r, L):
         '''
             eps_r: NxM

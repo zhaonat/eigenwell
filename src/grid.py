@@ -27,18 +27,6 @@ class FiniteDifferenceGrid():
         self.make_derivatives();
         return;
 
-    def grid_average(self, center_array, w):
-        '''
-            sdf;
-        '''
-        # computes values at cell edges
-
-        xy = {'x': 0, 'y': 1}
-        center_shifted = np.roll(center_array, 1, axis=xy[w])
-        avg_array = (center_shifted+center_array)/2
-        return avg_array
-
-
     def createDws(self, s, f):
         '''
             s = 'x' or 'y': x derivative or y derivative
@@ -74,7 +62,7 @@ class FiniteDifferenceGrid():
 
         return (1/dw)*Dws;
 
-    def createDws_bloch(self, s, f, k = [0,0], L = [0,0]):
+    def createDws_bloch(self, s, f, k,L):
         '''
             s = 'x' or 'y': x derivative or y derivative
             f = 'b' or 'f'
@@ -84,35 +72,73 @@ class FiniteDifferenceGrid():
         '''
         M = np.prod(self.N);
         Nx, Ny = self.N[0], self.N[1];
-        sign = -1 if f == 'f' else 1;
+        dL = self.dL;
 
         # %% Sparse identity matrices
-        Ix = np.identity(Nx);
-        Iy = np.identity(Ny);
+        Ix = np.identity(Nx).astype('complex');
+        Iy = np.identity(Ny).astype('complex');
 
-        kx,ky = k;
-        Lx,Ly = L;
 
         # %% Create derivative operators
         if(s == 'x'):
             if(f == 'f'):
-                dxf = -Ix + np.roll(Ix, [0, 1]);
-                dxf[Nx-1,0] = np.exp(-1j*kx*Lx);
+                dxf = -Ix + np.roll(Ix, 1, axis = 1);
+                dxf[Nx-1,0] = np.exp(-1j*k*L);
                 Dws = 1/dL[0] * sp.kron(Iy, dxf);
             else:
-                dxb = Ix - np.roll(Ix, [0, -1]);
-                dxb[0,Nx-1] = -np.exp(+1j*kx*Lx);
+                dxb = Ix - np.roll(Ix, -1, axis = 1);
+                dxb[0,Nx-1] = -np.exp(+1j*k*L);
                 Dws = 1/dL[0] * sp.kron(Iy, dxb);
         elif(s == 'y'):
             if(f == 'f'):
-                dyf = -Iy + np.roll(Iy, [0, 1]);
-                dyf[Ny-1,0] = np.exp(-1j*ky*Ly);
+                dyf = -Iy + np.roll(Iy, 1, axis = 1);
+                dyf[Ny-1,0] = np.exp(-1j*k*L);
                 Dws = 1/dL[1] * sp.kron(dyf, Ix);
             else:
-                dyb = Iy - np.roll(Iy, [0, -1]);
-                dyb[0,Ny-1] = -np.exp(+1j*ky*Ly);
+                dyb = Iy - np.roll(Iy, -1, axis = 1);
+                dyb[0,Ny-1] = -np.exp(+1j*k*L);
 
                 Dws = 1/dL[1] * sp.kron(dyb, Ix);
+        return Dws;
+
+    def createDws_bloch2(self, s, f, k = 0, L = 0):
+        M = np.prod(self.N);
+        Nx = self.N[0];
+        Ny = self.N[1];
+
+        sign = -1 if f == 'f' else 1;
+        bloch_term = sign*np.exp(-sign*1j*k*L);
+
+
+        dw = None; #just an initialization
+        indices = np.reshape(np.arange(M), (Nx,Ny), order = 'F');
+        if(s == 'x'):
+            ind_adj = np.roll(indices, sign, axis = 0)
+            dw = self.dL[0]
+            threshold = 1;
+        elif(s == 'y'):
+            ind_adj = np.roll(indices, sign, axis = 1)
+            dw = self.dL[1];
+            threshold = Ny;
+
+        off_diag = (sign/dw)*np.ones(self.N).astype('complex');
+        on_diag = -(sign/dw)*np.ones(self.N).astype('complex');
+        off_diag[np.abs(indices-ind_adj) > threshold] = (1/dw)*bloch_term;
+        on_diag = np.reshape(on_diag, (M,),order = 'F')
+        off_diag = np.reshape(off_diag, (M,),order = 'F')
+
+        indices_flatten = np.reshape(indices, (M, ), order = 'F')
+        indices_adj_flatten = np.reshape(ind_adj, (M, ), order = 'F')
+        # on_inds = np.hstack((indices.flatten(), indices.flatten()))
+        # off_inds = np.concatenate((indices.flatten(), ind_adj.flatten()), axis = 0);
+        on_inds = np.hstack((indices_flatten, indices_flatten));
+        off_inds = np.concatenate((indices_flatten, indices_adj_flatten), axis = 0);
+
+        all_inds = np.concatenate((np.expand_dims(on_inds, axis =1 ), np.expand_dims(off_inds, axis = 1)), axis = 1)
+
+        data = np.concatenate((on_diag, off_diag), axis = 0)
+        Dws = sp.csc_matrix((data, (all_inds[:,0], all_inds[:,1])), shape = (M,M));
+        return Dws;
 
     ## overloaded operators (can we have multiple functions with the same name?)
     # python does not natively support overloading
