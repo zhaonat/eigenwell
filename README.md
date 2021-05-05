@@ -9,12 +9,12 @@ There are some references including analytic solutions to some example problems 
 The code in eigenwell implements everything using
 
 ## omega eigenproblem
-In this type of problem, there is no resolution of the wavevector k, we only solve for the eigenvalue $\omega$. For example, the modes of a waveguide.
+In this type of problem, there is no explicit resolution of the wavevector k, we only solve for the eigenvalue $\omega$. For example, the modes of a waveguide. However, we can include fixed Kx or Ky into the grid by using a bloch boundary condition. 
 
 ### Classic Dielectric Waveguide
 
 ## omega to k eigenproblem
-In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap.
+In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap. This type of problem means we need to extract the exp(ikx) or exp(iky) dependence analytically and modify the form of the operator.
 
 ### 1D Bragg Mirror
 In this eigenproblem, we are looking modes perpendicular to the surface of the 1D Bragg Mirror
