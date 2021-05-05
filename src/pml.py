@@ -1,14 +1,17 @@
 from .constants import *
+
 import numpy as np
 import scipy.sparse as sp
+
+
 
 class PML:
     '''
         the PML is actually a preconditioner, not a boundary BoundaryCondition
     '''
     def __init__(self, N, Npml, omega):
-        self.lnR = -12;
-        self.m = 3.5;
+        self.lnR = -16; #-12;
+        self.m = 4; #3.5;
         self.sigma_max = -(self.m+1)*self.lnR/(2*ETA0);
         self.N = np.array(N);
         self.Npml = np.array(Npml);
@@ -31,8 +34,10 @@ class PML:
         #indexes the real space coordinate where the PML begins
         sfactor_array = np.ones(self.N[dirind], dtype = 'complex');
 
-        loc_pml = np.array([w_array[self.Npml[dirind]-1], w_array[self.N[dirind]-self.Npml[dirind]]]); #specifies where the pml begins on each side
+        loc_pml = np.array([w_array[self.Npml[dirind]], w_array[self.N[dirind]-self.Npml[dirind]]]); #specifies where the pml begins on each side
         d_pml = np.abs(np.array(wrange) - loc_pml);  #pml thickness
+
+        ## how to handle divide by 0...
         sigma_max = self.sigma_max / d_pml; #usually the pml is the same thickness on both sides
 
         if(s == 'b'):
@@ -62,12 +67,13 @@ class PML:
         if(direction == 'x'):
             sws_vector = self.create_sfactor(wrange,s, dirind = 0);
             for j in range(self.N[1]):
-                Sw_s_2D[:, j] = sws_vector**-1;
+                Sw_s_2D[:, j] = 1/sws_vector;
         elif(direction == 'y'):
             sws_vector = self.create_sfactor(wrange,s, dirind = 1);
             for i in range(self.N[0]):
-                Sw_s_2D[i, :] = sws_vector**-1;
+                Sw_s_2D[i, :] = 1/sws_vector;
 
+        ## we implement order = 'F'
         Sw_s_2D = np.reshape(Sw_s_2D, (M, ), order = 'F')
 
         Sws=sp.spdiags(Sw_s_2D,0,M,M);
@@ -78,6 +84,7 @@ class PML:
         self.Syf, self.syf  = self.createSws('y', 'f', yrange);
         self.Sxb, self.sxb  = self.createSws('x', 'b', xrange);
         self.Syb, self.syb  = self.createSws('y', 'b', yrange);
+        return self.Sxf, self.Syf, self.Sxb, self.Syb
 
 class SymmetrizePML(PML):
     '''

@@ -1,5 +1,8 @@
 from .eigen import *
 from .constants import *
+from .grid import *
+from .pml import *
+from .pec_pmc import *
 '''
     eigenomega is different because we solve for omega
 '''
@@ -8,89 +11,85 @@ class EigenOmega1D(Eigen):
         omega is the solved eigenvalue
         no resolution on K
         eigenvalue problem is not quadratic so we're good
+        structure is part of eigen abstract class
     '''
-    def __init__(self, eps_r, grid, mode = 'TE'):
+    def __init__(self, eps_r_struct, mode = 'TE'):
 
-        super().__init__(eps_r, grid);
+        super().__init__(eps_r_struct);
         self.polarization = mode;
-        self.make_operator_components(mode);
+        self.make_operator_components();
 
-    def make_operator_components(self, mode):
+    def make_operator_components(self):
 
-        def grid_average(center_array, w):
-            '''
-                center_array, 1d eps_r
-            '''
-            # computes values at cell edges
+        Dxf = self.grid.Dxf;
+        Dxb = self.grid.Dxb;
 
-            xy = {'x': 0, 'y': 1}
-            center_shifted = np.roll(center_array, 1, axis=xy[w])
-            avg_array = (center_shifted+center_array)/2
-            return avg_array
-        Epxx = grid_average(self.eps_r, 'x');
+        invTepxx = sp.spdiags(1/(EPSILON0*Epxx.flatten()), 0, self.M, self.M)
+        invTepzz = sp.spdiags(1/EPSILON0*self.eps_r.flatten(), 0, self.M, self.M)
 
-        invTepxx = sp.spdiags(1/(EPSILON0*self.eps_r.flatten()), 0, self.M, self.M)
-        Tepzz = sp.spdiags(EPSILON0*self.eps_r.flatten(), 0, self.M, self.M)
-        ## ================================================================
-        #A = Tepzz@Dxf@(invTepxx)@Dxb + Tepzz@sp.spdiags(omega**2*mu0*np.ones((Nx,)), 0, Nx,Nx, format = matrix_format);
-        ## ============================================================
-        # A = Dxf @ Dxb + omega ** 2 * mu0*Tepzz
-        # A = A.astype('complex')
-        if(mode == 'TE'):
-            A = -(1/MU0)*invTepxx@self.grid.Dxf@self.grid.Dxb
-        else:
-            A = self.grid.Dxf@invTepxx@self.grid.Dxb
+        if(self.polarization == 'TE'):
+            A = -(1/MU0)*invTepzz@(Dxb@Dxf)
+        elif(self.polarization == 'TM'):
+            A = -(1/MU0)* ( Dxf@(invTepxx)@Dxb )
         self.A = A;
-
-    def eigensolve(self, num_modes = 10, sigma = 0):
-        '''
-            solve for the k eigenvalue for a given omega
-        '''
-        ## get eigenvalues
-        eigenvals, eigenmodes = sp.linalg.eigs(self.A, k=num_modes, which = 'SM')
-
-        return eigenvals, eigenmodes;
 
 
 class EigenOmega2D(Eigen):
-    def __init__(self, eps_r, grid, polarization = 'TE'):
+    '''
+        challenge: npml means we need to specify a frequency, which is not great
+    '''
+    def __init__(self, eps_r, omega_guess = None,
+                              npml = [0,0],
+                              pec_pmc = False,
+                              polarization = 'TE'):
+        '''
+            npml: pml thickness in number of cells
+            omega_guess
 
-        super().__init__(eps_r, grid);
-        self.polarization = mode;
-        self.make_operator_components(mode);
+            how do we specify a boundary condition?
+        '''
+        super().__init__(eps_r);
+        self.polarization = polarization;
+        self.omega = omega_guess;
+        self.npml = npml;
+        self.pec_pmc = pec_pmc;
+        self.make_operator_components();
 
-    def make_operator_components(self, mode):
 
-        def grid_average(center_array, w):
-            '''
-                center_array, 1d eps_r
-            '''
-            # computes values at cell edges
+    def make_operator_components(self):
 
-            xy = {'x': 0, 'y': 1}
-            center_shifted = np.roll(center_array, 1, axis=xy[w])
-            avg_array = (center_shifted+center_array)/2
-            return avg_array
+        M = self.structure.M;
+        N = self.structure.N;
+        Dxf = self.grid.Dxf; Dyf = self.grid.Dyf;
+        Dxb = self.grid.Dxb; Dyb = self.grid.Dyb;
 
-        Epxx = grid_average(self.eps_r, 'x');
-        Epyy = grid_average(self.eps_r, 'x');
-        invTepxx = sp.spdiags(1/(EPSILON0*Epxx.flatten()), 0, self.M, self.M)
-        invTepyy = sp.spdiags(1/(EPSILON0*Epyy.flatten()), 0, self.M, self.M)
+        if(self.omega!=None and np.sum(self.npml)>0):
+            pml_obj = PML(self.structure.N, self.npml, self.omega)
+            pml_obj.Soperators(self.structure.xrange, self.structure.yrange);
 
-        Tepzz = sp.spdiags(EPSILON0*self.eps_r.flatten(), 0, self.M, self.M)
+            Sxf, Syf = pml_obj.Sxf, pml_obj.Syf;
+            Sxb, Syb = pml_obj.Sxb, pml_obj.Syb;
 
-        if(mode == 'TE'):
-            A = -(1/MU0)*invTepxx@(self.grid.Dxf@self.grid.Dxb+ self.grid.Dyf@self.grid.Dyb)
-        else:
-            A = -(1/MU0)*(self.grid.Dxf)@(invTepxx)@(self.grid.Dxb) + (self.grid.Dyf)@(invTepyy)@(self.grid.Dyb)
+            Dxf, Dxb = Sxf@Dxf, Sxb@Dxb;
+            Dyf, Dyb = Syf@Dyf, Syb@Dyb;
+
+        pec_pmc_mask = sp.identity(M);
+        if(self.pec_pmc == True):
+            pec_pmc_obj = PEC_PMC(N);
+            mask_x = pec_pmc_obj.mask_x
+            mask_y = pec_pmc_obj.mask_y;
+            pec_pmc_mask = pec_pmc_obj.mask_x@pec_pmc_obj.mask_y;
+
+        Epxx = np.reshape(self.structure.epxx, (M,), order = 'F')
+        Epyy = np.reshape(self.structure.epyy, (M,), order = 'F');
+        Epzz = np.reshape(self.structure.eps_r, (M,), order = 'F');
+
+        invTepxx = sp.spdiags(1/(EPSILON0*Epxx), 0, M,M)
+        invTepyy = sp.spdiags(1/(EPSILON0*Epyy), 0, M,M)
+        invTepzz = sp.spdiags(1/(EPSILON0*Epzz), 0, M,M)
+
+        if(self.polarization == 'TE'):
+            A = -(1/MU0)*pec_pmc_mask@(invTepzz@(Dxb@Dxf+ Dyb@Dyf))@pec_pmc_mask;
+        elif(self.polarization == 'TM'):
+            A = -(1/MU0)* pec_pmc_mask@( Dxf@(invTepxx)@Dxb + Dyf@(invTepyy)@Dyb )@pec_pmc_mask;
         self.A = A;
-
-
-    def eigensolve(self, num_modes = 10, sigma = 0):
-        '''
-            solve for the k eigenvalue for a given omega
-        '''
-        ## get eigenvalues
-        eigenvals, eigenmodes = sp.linalg.eigs(self.A, k=num_modes, which = 'SM')
-
-        return eigenvals, eigenmodes;
