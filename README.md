@@ -38,6 +38,8 @@ Example below is a metal conductor waveguide.
 # Examples
 these contain python scripts meant to be run from the command line (vs the Jupyter notebooks). Among these are parallel implementations for obtaining bandsolvers using python's multiprocessing module
 
+# Implementation Notes
+Note that python uses 'C'-contiguous ordering of its n>1 dimensional arrays. I will be using 'F' ordering of the arrays (which is what MatLab) uses.
+
 ## Current Problems
 1. Implementing PMLs and PECs in a universal way across all eigensolvers.
-2. Ordering of n>1 dimensional numpy arrays is not the same as MatLab during reshape or flatten operations
