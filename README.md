@@ -49,3 +49,4 @@ Note that python uses 'C'-contiguous ordering of its n>1 dimensional arrays. I w
 
 ## Current Problems
 1. Implementing PMLs and PECs in a universal way across all eigensolvers. I'd like to implement everything as left and right preconditioners, but that might not be viable so I'm using workarounds at present.
+2. correct bloch boundary
