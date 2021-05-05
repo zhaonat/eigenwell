@@ -42,4 +42,4 @@ these contain python scripts meant to be run from the command line (vs the Jupyt
 Note that python uses 'C'-contiguous ordering of its n>1 dimensional arrays. I will be using 'F' ordering of the arrays (which is what MatLab) uses. That means when you reshape a flat eigenvector, you should do np.reshape(flat_array, new_dim, ordering = 'F'), otherwise your result will look messed up.
 
 ## Current Problems
-1. Implementing PMLs and PECs in a universal way across all eigensolvers.
+1. Implementing PMLs and PECs in a universal way across all eigensolvers. I'd like to implement everything as left and right preconditioners, but that might not be viable so I'm using workarounds at present.
