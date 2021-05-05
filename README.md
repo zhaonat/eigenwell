@@ -5,13 +5,19 @@ Plane wave expansion is based on breaking the problem into the Fourier domain. A
 
 There are some references including analytic solutions to some example problems and some simple pwe code in 1D in the notebooks section as well for comparison.
 
-### Conventions
-The code in eigenwell implements everything using
+## Conventions
+TM polarization: Hz, Ex, Ey (H field out of plane)
+TE polarization: Ez, Hx, Hy (E field out of plane)
+
+1D simulations are along the x axis. 2D simulations are along the x and y axes
+
 
 ## omega eigenproblem
 In this type of problem, there is no explicit resolution of the wavevector k, we only solve for the eigenvalue $\omega$. For example, the modes of a waveguide. However, we can include fixed Kx or Ky into the grid by using a bloch boundary condition. 
 
 ### Classic Dielectric Waveguide
+
+### Surface Plasmons (TM)
 
 ## omega to k eigenproblem
 In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap. This type of problem means we need to extract the exp(ikx) or exp(iky) dependence analytically and modify the form of the operator.
