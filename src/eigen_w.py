@@ -6,50 +6,6 @@ from .pec_pmc import *
 '''
     eigenomega is different because we solve for omega
 '''
-class EigenOmega1D(Eigen):
-    '''
-        omega is the solved eigenvalue
-        no resolution on K
-        eigenvalue problem is not quadratic so we're good
-        structure is part of eigen abstract class
-    '''
-    def __init__(self, eps_r_struct, omega_guess = None,
-                              npml = [0,0],
-                              mode = 'TE'):
-
-        super().__init__(eps_r_struct);
-        self.polarization = mode;
-        self.omega= omega_guess;
-        self.npml = npml;
-        self.make_operator_components();
-
-    def make_operator_components(self):
-
-        Dxf = self.grid.Dxf;
-        Dxb = self.grid.Dxb;
-
-        if(self.omega!=None and np.sum(self.npml)>0):
-            pml_obj = PML(self.structure.N, self.npml, self.omega)
-            pml_obj.Soperators(self.structure.xrange, self.structure.yrange);
-
-            Sxf, Sxb = pml_obj.Sxf, pml_obj.Sxb;
-            Dxf, Dxb = Sxf@Dxf, Sxb@Dxb;
-
-
-        M = self.structure.M
-        Epxx = np.reshape(self.structure.epxx, (M,), order = 'F')
-        Epzz = np.reshape(self.structure.eps_r, (M,), order = 'F');
-
-        invTepxx = sp.spdiags(1/(EPSILON0*Epxx), 0, M,M)
-        invTepzz = sp.spdiags(1/(EPSILON0*Epzz), 0, M,M)
-
-        if(self.polarization == 'TE'):
-            A = -(1/MU0)*invTepzz@(Dxb@Dxf)
-            self.A = A;
-        elif(self.polarization == 'TM'):
-            A = -(1/MU0)* ( Dxf@(invTepxx)@Dxb )
-            self.A = A;
-
 
 class EigenOmega2D(Eigen):
     '''

@@ -37,14 +37,14 @@ class FiniteDifferenceGrid():
         Nx = self.N[0];
         Ny = self.N[1];
 
-        sign = -1 if f == 'f' else 1;
+        sign = 1 if f == 'f' else -1;
         dw = None; #just an initialization
         indices = np.reshape(np.arange(M), (Nx,Ny), order = 'F');
         if(s == 'x'):
-            ind_adj = np.roll(indices, sign, axis = 0)
+            ind_adj = np.roll(indices, -sign, axis = 0)
             dw = self.dL[0]
         elif(s == 'y'):
-            ind_adj = np.roll(indices, sign, axis = 1)
+            ind_adj = np.roll(indices, -sign, axis = 1)
             dw = self.dL[1];
 
         # we could use flatten here since the indices are already in 'F' order
@@ -62,62 +62,21 @@ class FiniteDifferenceGrid():
 
         return (1/dw)*Dws;
 
-    def createDws_bloch(self, s, f, k,L):
-        '''
-            s = 'x' or 'y': x derivative or y derivative
-            f = 'b' or 'f'
-            k: wavevectors kx,ky
-            L: unit cell dimensions
-            catches exceptions if s and f are misspecified
-        '''
-        M = np.prod(self.N);
-        Nx, Ny = self.N[0], self.N[1];
-        dL = self.dL;
-
-        # %% Sparse identity matrices
-        Ix = np.identity(Nx).astype('complex');
-        Iy = np.identity(Ny).astype('complex');
-
-
-        # %% Create derivative operators
-        if(s == 'x'):
-            if(f == 'f'):
-                dxf = -Ix + np.roll(Ix, 1, axis = 1);
-                dxf[Nx-1,0] = np.exp(-1j*k*L);
-                Dws = 1/dL[0] * sp.kron(Iy, dxf);
-            else:
-                dxb = Ix - np.roll(Ix, -1, axis = 1);
-                dxb[0,Nx-1] = -np.exp(+1j*k*L);
-                Dws = 1/dL[0] * sp.kron(Iy, dxb);
-        elif(s == 'y'):
-            if(f == 'f'):
-                dyf = -Iy + np.roll(Iy, 1, axis = 1);
-                dyf[Ny-1,0] = np.exp(-1j*k*L);
-                Dws = 1/dL[1] * sp.kron(dyf, Ix);
-            else:
-                dyb = Iy - np.roll(Iy, -1, axis = 1);
-                dyb[0,Ny-1] = -np.exp(+1j*k*L);
-
-                Dws = 1/dL[1] * sp.kron(dyb, Ix);
-        return Dws;
-
-    def createDws_bloch2(self, s, f, k = 0, L = 0):
+    def createDws_bloch(self, s, f, k = 0, L = 0):
         M = np.prod(self.N);
         Nx = self.N[0];
         Ny = self.N[1];
 
-        sign = -1 if f == 'f' else 1;
+        sign = 1 if f == 'f' else -1;
         bloch_term = sign*np.exp(-sign*1j*k*L);
 
-
-        dw = None; #just an initialization
         indices = np.reshape(np.arange(M), (Nx,Ny), order = 'F');
         if(s == 'x'):
-            ind_adj = np.roll(indices, sign, axis = 0)
+            ind_adj = np.roll(indices, -sign, axis = 0)
             dw = self.dL[0]
             threshold = 1;
         elif(s == 'y'):
-            ind_adj = np.roll(indices, sign, axis = 1)
+            ind_adj = np.roll(indices, -sign, axis = 1)
             dw = self.dL[1];
             threshold = Ny;
 
