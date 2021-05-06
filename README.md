@@ -21,8 +21,10 @@ Because eigensolving on sparse FDFD matrices can be tricky, the eigen classes do
 In this type of problem, there is no explicit resolution of the wavevector k, we only solve for the eigenvalue $\omega$. For example, the modes of a waveguide. However, we can include fixed Kx or Ky into the grid by using a bloch boundary condition. 
 
 ### Classic Dielectric Waveguide
+![Alt text](./img/dielectric_guide_mode.png?raw=true "Title")
 
 ### Surface Plasmons (TM)
+![Alt text](./img/surface_plasmons.png?raw=true "Title")
 
 ## omega to k eigenproblem
 In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap. This type of problem means we need to extract the exp(ikx) or exp(iky) dependence analytically and modify the form of the operator.
