@@ -15,7 +15,6 @@ class Eigen(ABC):
         '''
             structure should be of class structure
         '''
-        
         self.structure = structure;
         self.grid = FiniteDifferenceGrid(structure.dL,structure.N);
 

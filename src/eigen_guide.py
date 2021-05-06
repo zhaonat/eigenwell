@@ -2,50 +2,42 @@ from .eigen import *
 from .constants import *
 import scipy.sparse.linalg as la
 
-class EigenGuideK2D(Eigen):
+class EigenGuide2D(Eigen):
     '''
         variation in x, wavevector solved in y, i.e. ky
+        eps_r_struct: obj of structure which contains eps_r
+        eigenvalue being solved is ky^2 in direction perpendicular to x
+        ksqr, modes = la.eigs(A, k=num_modes, sigma = sigma)
+
     '''
-    def __init__(self, eps_r, grid, polarization = 'TE'):
-        super().__init__(eps_r, grid);
+    def __init__(self, eps_r_struct, polarization = 'TE'):
+        super().__init__(eps_r_struct);
         self.polarization = polarization
-        self.make_operator_components();
+        self.make_operator_components(0);
 
-    def make_operator_components(self):
+    def make_operator_components(self, omega):
 
-        Epxx = self.grid_average(EPSILON0*self.eps_r.flatten(), 'x');
-        invTepxx = sp.spdiags(1/(Epxx), 0, self.M, self.M)
+        M = self.structure.M
+        Dxf = self.grid.Dxf; Dxb = self.grid.Dxb;
 
-        self.Tepzz = sp.spdiags(EPSILON0*self.eps_r.flatten(), 0,  self.M, self.M)
-        self.Tepxx = sp.spdiags(Epxx, 0,  self.M, self.M)
+        Epxx = np.reshape(self.structure.epxx, (M,), order = 'F')
+        invTepxx = sp.spdiags(1/(EPSILON0*Epxx), 0, M, M)
+        Epzz = np.reshape(self.structure.eps_r, (M,), order = 'F');
+        Tepzz = sp.spdiags(EPSILON0*Epzz, 0,  M, M)
 
         if(self.polarization == 'TM'):
-            A = self.Tepzz@self.grid.Dxb@(invTepxx)@self.grid.Dxf;
+            A = Tepzz@Dxb@(invTepxx)@Dxf +Tepzz*(omega**2*MU0);
         elif(self.polarization == 'TE'):
-            A = self.grid.Dxf @ self.grid.Dxb;
+            A = Dxf @ Dxb + omega**2*MU0*Tepzz;
         ## how abou tthe TE polarization?
         A = A.astype('complex')
         self.A = A;
 
-    def update_structure(self, eps_r):
+    def update_structure(self, eps_r_struct):
         '''
             use this to do dispersive eigensolves
         '''
-        self.eps_r = eps_r;
-        self.make_operator_components();
-
-    def eigensolve(self, omega, sigma = 0, num_modes = 10):
-        '''
-            solve for the k eigenvalue for a given omega
-        '''
-        I = sp.identity(self.M); #identity matrix
-        if(self.polarization == 'TM'):
-            A = self.A + self.Tepzz*(omega**2*MU0)
-        elif(self.polarization == 'TE'):
-            A = self.A + omega**2*MU0*self.Tepzz;
-
-        ksqr, modes = la.eigs(A, k=num_modes, sigma = sigma)
-        return ksqr, modes;
+        self.structure = eps_r_struct;
 
 
 class EigenGuide3D(Eigen):
@@ -83,19 +75,10 @@ class EigenGuide3D(Eigen):
         Tep = sp.block_diag((Tey, Tex))
         self.A =  Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4;
 
-    def update_operator(self.omega):
+    def update_operator(self,omega):
 
         Tey = sp.diags(EPSILON0*epyy.flatten(), 0,  (self.M,self.M))
         Tex = sp.diags(EPSILON0*epxx.flatten(), 0, (self.M,self.M))
         Tep = sp.block_diag((Tey, Tex))
 
         return self.A + omega**2*MU0*Tep;
-
-    # def eigensolve(self, omega, sigma = 0, num_modes = 10):
-    #     Tep = sp.block_diag((self.Tey, self.Tex))
-    #
-    #     A = self.A + omega**2*MU0*Tep;
-    #     #omega**2*MU0*Tep + Tep@(Dop1)@invTez@(Dop2) + Dop3@Dop4
-    #
-    #     ksqr, modes = la.eigs(A, k=num_modes, sigma = sigma)
-    #     return ksqr, modes;
