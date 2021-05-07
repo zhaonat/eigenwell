@@ -44,6 +44,10 @@ class EigenK1D(Eigen):
             self.Cop = -invTepxx@(-1j * (self.grid.Dxf + self.grid.Dxb));
             self.Kop = -invTepxx@(self.grid.Dxf @ self.grid.Dxb) - omega**2*MU0*EPSILON0*I;
 
+        OB = sp.bmat([[self.Mop, None],[None, I]]);
+        OA = sp.bmat([[self.Cop, self.Kop],[-I, None]]);
+        self.OA = OA;
+        self.OB = OB;
 
 class EigenK2D(Eigen):
     '''
@@ -53,15 +57,15 @@ class EigenK2D(Eigen):
         this does not assume that x direction is just e^ikx, it is f(x)e^ikx
         so we can use this for the 2d PhC for example
     '''
-    def __init__(self, structure, grid, omega = 0, polarization = 'TE'):
+    def __init__(self, structure, omega = 0, polarization = 'TE'):
 
-        super().__init__(structure, grid);
+        super().__init__(structure);
         self.polarization = polarization
         self.make_operator_components(omega);
 
         return;
 
-    def make_operator_components(self, omega, ky = 0):
+    def make_operator_components(self, omega):
         '''
             we can fix a ky for the y derivatives
         '''
@@ -83,16 +87,16 @@ class EigenK2D(Eigen):
         if(self.polarization == 'TM'):
             self.Mop = invTepxx;
             self.Cop = -(-1j * (Dxf@invTepxx + invTepxx@Dxb));
-            self.Kop = (-Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb) + omega**2*I
+            self.Kop = (-Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb) - omega**2*MU0*EPSILON0*I
             self.Kpart = (-Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb)
         elif(self.polarization == 'TE'):
-            self.Kop = invTepzz@(-Dxf @ Dxb - Dyf @ Dyb) + omega**2*I
+            self.Kop = invTepzz@(-Dxf @ Dxb - Dyf @ Dyb) - omega**2*MU0*EPSILON0*I
             self.Kpart = invTepzz@(-Dxf @ Dxb - Dyf @ Dyb)
             self.Mop = invTepzz;
             self.Cop = -invTepzz@(1j * (Dxf + Dxb)); #% lambda
 
         OB = sp.bmat([[self.Mop, None],[None, I]]);
-        OA = sp.bmat([[self.Cop, K_omega],[-I, None]]);
+        OA = sp.bmat([[self.Cop, self.Kop],[-I, None]]);
         self.OA = OA;
         self.OB = OB;
 

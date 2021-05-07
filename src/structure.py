@@ -8,7 +8,7 @@ class Structure():
     def __init__(self,eps_r, L):
         '''
             eps_r: NxM
-            L: 2x1 Lx,Ly array
+            L: 2x1 Lx,Ly array (1D structures will be)
         '''
         self.N = eps_r.shape
         self.M = np.prod(self.N);
