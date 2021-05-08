@@ -11,7 +11,7 @@ TE polarization: Ez, Hx, Hy (E field out of plane)
 
 1D simulations are along the x axis. 2D simulations are along the x and y axes
 
-## Eigensolving
+## Eigensolving Workflow
 Because eigensolving on sparse FDFD matrices can be tricky, the eigen classes do not implement any solvers. Instead, you will have access to the final operator and you will have the responsibility of setting up the sparse eigensolving problem as you desire. typically though, eigensolving requires you to put in a guess of omega
 
 ### Eigensolving with PMLs
