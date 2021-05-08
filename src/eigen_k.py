@@ -44,8 +44,10 @@ class EigenK1D(Eigen):
             self.Cop = -invTepxx@(-1j * (self.grid.Dxf + self.grid.Dxb));
             self.Kop = -invTepxx@(self.grid.Dxf @ self.grid.Dxb) - omega**2*MU0*EPSILON0*I;
 
-        OB = sp.bmat([[self.Mop, None],[None, I]]);
-        OA = sp.bmat([[self.Cop, self.Kop],[-I, None]]);
+        OB = sp.bmat([[self.Mop, None],
+                        [None, I]]);
+        OA = sp.bmat([[self.Cop, self.Kop],
+                            [-I, None]]);
         self.OA = OA;
         self.OB = OB;
 
@@ -86,12 +88,14 @@ class EigenK2D(Eigen):
 
         if(self.polarization == 'TM'):
             self.Mop = invTepxx;
-            self.Cop = -(-1j * (Dxf@invTepxx + invTepxx@Dxb));
-            self.Kop = (-Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb) - omega**2*MU0*EPSILON0*I
-            self.Kpart = (-Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb)
+            self.Cop = -( -1j * (Dxf@invTepxx + invTepxx@Dxb));
+            self.Kpart = (- Dxf @ invTepxx@ Dxb - Dyf @ invTepyy@Dyb)
+            self.Kop = self.Kpart - omega**2*MU0*EPSILON0*I
+
         elif(self.polarization == 'TE'):
-            self.Kop = invTepzz@(-Dxf @ Dxb - Dyf @ Dyb) - omega**2*MU0*EPSILON0*I
             self.Kpart = invTepzz@(-Dxf @ Dxb - Dyf @ Dyb)
+            self.Kop = self.Kpart - omega**2*MU0*EPSILON0*I
+
             self.Mop = invTepzz;
             self.Cop = -invTepzz@(1j * (Dxf + Dxb)); #% lambda
 
@@ -100,12 +104,15 @@ class EigenK2D(Eigen):
         self.OA = OA;
         self.OB = OB;
 
+        ## eigenvalue problem la.eigs(OA, M = OB)
+
     def update_operator(self,omega):
         '''
             only run after make_operator_components is called
+            eigenproblem: OAx = OB \lambda x
         '''
-        self.Kop = self.Kpart+omega**2*sp.identity(self.structure.M)
+        self.Kop = self.Kpart-omega**2*MU0*EPSILON0*sp.identity(self.structure.M)
         OB = sp.bmat([[self.Mop, None],[None, I]]);
         OA = sp.bmat([[self.Cop, Kop],[-I, None]]);
-        self.OA = OA;
+        self.OA = OA; #
         self.OB = OB;
