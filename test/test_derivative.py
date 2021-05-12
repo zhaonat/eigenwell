@@ -1,9 +1,7 @@
 import unittest
 import numpy as np
 
-import sys
-sys.path.append('../src')
-from src import grid
+from eigenwell.src import grid
 #python -m unittest test_module1 test_module2
 
 class DerivativeTests(unittest.TestCase):
@@ -11,7 +9,7 @@ class DerivativeTests(unittest.TestCase):
         super(DerivativeTests, self).__init__(*args, **kwargs)
         self.dL = [0.01,0.01];
         self.N = [100,100];
-        self.testgrid = grid.FiniteDifference(self.dL,self.N);
+        self.testgrid = grid.FiniteDifferenceGrid(self.dL,self.N);
 
     def test_symmetry_second(self):
         ## check matrix is symmetric
@@ -25,14 +23,26 @@ class DerivativeTests(unittest.TestCase):
 
     def testnnz_elems(self):
         Dxf = self.testgrid.Dxf;
-        Dyf = self.testgrid.Dxb;
-        Dx2 = Dxf@Dyf;
+        Dxb = self.testgrid.Dxb;
+        Dx2 = Dxf@Dxb;
         Dyf = self.testgrid.Dyf;
         Dyb = self.testgrid.Dyb;
-        Dx2 = Dxf@Dyf;
+        Dy2 = Dyf@Dyb;
         M = Dx2.shape[0]
         self.assertEqual(Dx2.count_nonzero(),3*M);
         self.assertEqual(Dy2.count_nonzero(),3*M);
+
+    def dxf_to_dxb(self):
+        '''
+            check dxf = -dxb.T;
+            check dyf = -dyb.T;
+        '''
+        Dxf = self.testgrid.Dxf;
+        Dyf = self.testgrid.Dxb;
+        Dyf = self.testgrid.Dyf;
+        Dyb = self.testgrid.Dyb;
+        self.assertEqual((abs(Dxf+Dxb.T)>1e-10).nnz, 0);
+        self.assertEqual((abs(Dyf+Dyb.T)>1e-10).nnz, 0);
 
         return;
 

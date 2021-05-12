@@ -90,10 +90,15 @@ class SymmetrizePML(PML):
     '''
         generates left and right symmetrization of the pml
     '''
-    def __init__(self,N, Npml, omega):
+    def __init__(self,N, Npml, omega, polarization = 'TE'):
+        self.polarization = polarization;
         super().__init__(N,Npml,omega);
 
     def Soperators(self, xrange, yrange):
+        '''
+            generate Soperators with the symmetrizer...
+        '''
+        M = np.prod(self.N)
         self.Sxf, _  = self.createSws('x', 'f', xrange);
         self.Syf, _  = self.createSws('y', 'f', yrange);
         self.Sxb, _  = self.createSws('x', 'b', xrange);
@@ -103,3 +108,16 @@ class SymmetrizePML(PML):
         Sxbd = self.Sxb.diagonal();
         Syfd = self.Syf.diagonal();
         Sybd = self.Syb.diagonal();
+
+        if(self.polarization == 'TM'):
+            numerator = np.sqrt(Sxfd*Syfd);
+        elif(self.polarization == 'TE'):
+            numerator = np.sqrt(Sxbd*Sybd);
+
+        denominator = 1/(numerator);
+        Pr = sp.spdiags(numerator, 0, M,M);
+        Pl = sp.spdiags(denominator,0,M,M);
+
+        self.Pl = Pl;
+        self.Pr = Pr;
+        return Pl, Pr;
