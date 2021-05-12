@@ -58,6 +58,11 @@ these contain python scripts meant to be run from the command line (vs the Jupyt
 # Implementation Notes
 Note that python uses 'C'-contiguous ordering of its n>1 dimensional arrays. I will be using 'F' ordering of the arrays (which is what MatLab) uses. That means when you reshape a flat eigenvector, you should do np.reshape(flat_array, new_dim, ordering = 'F'), otherwise your result will look messed up.
 
+### symmetric vs unsymmetric eigenproblems
+Since in general, reciprocity is not broken for electrodynamic systems, we expect symmetry in the matrix. Note that the matrix should not be hermitian (might make loss into gain). However, when implementing things like a PML, the matrix may come out unsymmetric. Solving an unsymmetric vs a symmetric matrix differs significantly so it is to our advantage to have a symmetric PML.
+
+scipy implements eigs and eigsh which are wrappers of ARPACK and implements an Arnoldi iterative eigenvalue solver. However, another commonly used one is the Jacobi-Davidson which scipy does not have support for. One of the examples shows how to use SLEPc for solving this eigenvalue problem.
+
 ## Current Problems
 1. Implementing PMLs and PECs in a universal way across all eigensolvers. I'd like to implement everything as left and right preconditioners, but that might not be viable so I'm using workarounds at present.
 2. correct bloch boundary
