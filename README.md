@@ -51,6 +51,9 @@ In this eigenproblem, we are looking modes perpendicular to the surface of the 1
 Example below is a metal conductor waveguide.
 ![Alt text](./img/conductor_3D_waveguide.png?raw=true "Title")
 
+### Circular Perfect Metal Waveguide
+![Alt text](./img/metal_cylindrical_waveguide.png?raw=true "Title")
+
 
 # Examples
 these contain python scripts meant to be run from the command line (vs the Jupyter notebooks). Among these are parallel implementations for obtaining bandsolvers using python's multiprocessing module
