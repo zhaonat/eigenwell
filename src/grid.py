@@ -141,6 +141,7 @@ class NonUniformGrid(FiniteDifferenceGrid):
     @staticmethod
     def generate_nonuniform_scaling(Nft, drt):
         '''
+            this method should be used by the user?
             best way to parametrize this? use a dictionary or mask
             Nft: 1st column is x, 2nd column is y
             #sizes of all regions with the
