@@ -102,7 +102,81 @@ class FiniteDifferenceGrid():
     ## overloaded operators (can we have multiple functions with the same name?)
     # python does not natively support overloading
     def make_derivatives(self):
-            self.Dxf = self.createDws('x', 'f');
-            self.Dyf = self.createDws('y', 'f');
-            self.Dxb = self.createDws('x', 'b');
-            self.Dyb = self.createDws('y', 'b');
+        self.Dxf = self.createDws('x', 'f');
+        self.Dyf = self.createDws('y', 'f');
+        self.Dxb = self.createDws('x', 'b');
+        self.Dyb = self.createDws('y', 'b');
+
+
+class NonUniformGrid(FiniteDifferenceGrid):
+    def __init__(self, dL,N):
+        super().__init__(dL,N); #base fd grid;
+        self.N = N;
+
+    def non_uniform_operator(self):
+        dx_scale, dy_scale = generate_nonuniform_scaling();
+
+        [Xs, Ys] = np.meshgrid(dx_scale, dy_scale);
+        #meshgrid isn't right for y
+        M = np.prod(Xs.shape)
+
+        # we have to this kind of flip because the flattening
+        # operation (:) doesn't retain row-major order
+        Ys=Ys.T; Xs = Xs.T;
+        Fsy = sp.spdiags(Ys.flatten(),0,M,M);
+        Fsx = sp.spdiags(Xs.flatten(),0,M,M);
+
+        # might as well construct the conjugate grid. What is the conjugate grid?
+        xc = (dx_scale+np.roll(dx_scale,[0,1]))/2;
+        yc = (dy_scale+np.roll(dy_scale,[0,1]))/2;
+
+        [Xc, Yc] = np.meshgrid(xc, yc);
+        Xc = Xc.T;
+        Yc = Yc.T;
+        Fsy_conj = sp.spdiags(Yc.flatten(),0,M,M);
+        Fsx_conj = sp.spdiags(Xc.flatten(),0,M,M);
+        return Fsx, Fsy, Fsx_conj, Fsy_conj;
+
+
+    @staticmethod
+    def generate_nonuniform_scaling(Nft, drt):
+        '''
+            this method should be used by the user?
+            best way to parametrize this? use a dictionary or mask
+            Nft: 1st column is x, 2nd column is y
+            #sizes of all regions with the
+            [coarse, transition, fine, transition, coarse]
+            drt: list of discretizations...normalized by some reference
+        '''
+        Nx = np.sum(Nft[:,0]);
+        Ny = np.sum(Nft[:,1]);
+        dx_scale = np.ones(Nx)
+        dy_scale = np.ones(Ny);
+
+        num_regions = Nft.shape[0]; #iterate through 0,2,4
+        x0 = y0 = 0;
+        for i in range(0,num_regions,2):
+            dx_scale[x0:x0+Nft[i,0]] = drt[i,0];
+            dy_scale[y0:y0+Nft[i,1]] = drt[i,1];
+            if(i==num_regions-1): #%no transition after last region
+                x0 = x0+Nft[i,0];
+                y0 = y0+Nft[i,1];
+            else:
+                x0 = x0+Nft[i,0]+Nft[i+1,0];
+                y0 = y0+Nft[i,1]+Nft[i+1,1];
+
+
+        x0 = Nft[1,0]; y0 = Nft[1,1];
+        for i in range(1, num_regions,2): #2:2:num_regions
+            dx1 = drt[i-1,0]; dx2 = drt[i+1,0];
+            dy1 = drt[i-1,1]; dy2 = drt[i+1,1];
+            nxt = Nft[i,0]; nyt = Nft[i,1];
+
+            grading_x = np.logspace(np.log10(dx1), np.log10(dx2), nxt+1);
+            grading_y = np.logspace(np.log10(dy1), np.log10(dy2), nyt+1);
+
+            dx_scale[x0-1:x0+nxt] = grading_x;
+            dy_scale[y0-1:y0+nyt] = grading_y;
+
+            x0 = x0+Nft[i,0]+Nft[i+1,0];
+            y0 = y0+Nft[i,1]+Nft[i+1,1];

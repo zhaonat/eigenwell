@@ -13,6 +13,14 @@ class PEC_PMC():
         self.generate_mask();
         return;
 
+    def set_custom_mask(self, mask):
+        '''
+            uses your own mask
+        '''
+        M = np.prod(mask.shape)
+        MxMy = np.reshape(mask, (M,),order = 'F')
+        self.mask = sp.diags(MxMy, 0);
+
     def generate_mask(self):
 
         xn = list(range(self.N[0]));
@@ -33,3 +41,4 @@ class PEC_PMC():
         my = np.reshape(masky, (M,),order = 'F')
         self.mask_x = sp.diags(mx, 0);
         self.mask_y = sp.diags(my, 0);
+        self.mask = self.mask_x@self.mask_y;
