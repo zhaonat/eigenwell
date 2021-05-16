@@ -26,16 +26,14 @@ In this type of problem, there is no explicit resolution of the wavevector k, we
 ### Surface Plasmons (TM)
 ![Alt text](./img/surface_plasmons.png?raw=true "Title")
 
-## omega to k eigenproblem
-In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap. This type of problem means we need to extract the exp(ikx) or exp(iky) dependence analytically and modify the form of the operator.
+# omega to k eigenproblem (aka Dispersive Eigensolver)
+In this problem, we can specify real $\omega$ and get all possible k's, including complex k's when we are, for example, in a bandgap. This type of problem means we need to extract the exp(ikx) or exp(iky) dependence analytically and modify the form of the operator. This also allows us to tackle dispersive media (permittivity depends on frequency), which, by the way, includes problems with a PML.
 
 ### 1D Bragg Mirror
 In this eigenproblem, we are looking modes perpendicular to the surface of the 1D Bragg Mirror
 
 ![Alt text](./img/bragg_mirror.png?raw=true "Title")
 
-# Dispersive Eigensolver
-In orde to tackle dispersive media (permittivity depends on frequency), which, by the way, includes problems with a PML, one could try to formulate a problem where the frequency omega is the input and k is the eigenvalue that is solved.
 
 ### insulator-metal-insulator example
 <img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1"> add text
