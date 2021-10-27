@@ -1,9 +1,9 @@
 # eigenwell
-An objective-oriented approach to finite difference based eigensolving for Maxwell's equations. Eigensolving is more nuanced than it initially might seem. What eigenvalue are you solving for, frequency or k? How do you formulate the problem for each? FDFD offers an interesting point of flexibility in eigenvalue solving 
+An objective-oriented approach to finite difference based eigensolving for Maxwell's equations. Eigensolving is more nuanced than it initially might seem. What eigenvalue are you solving for, frequency or k? How do you formulate the problem for each? FDFD offers an interesting point of flexibility in eigenvalue-solving compared to traditional methods such as PWEM. In PWEM, you are explicitly converting real space to k-space. In that regards, you cannot solve for a k-eigenvalue.
 
-Plane wave expansion is based on breaking the problem into the Fourier domain. As a result, you cannot solve for the eigenvalue of k given $\omega$
+**Advantage 1** FDFD can solve the $\omega \rightarrow k$ eigenproblem. Plane wave expansion is based on breaking the problem into the Fourier domain. As a result, you cannot solve for the eigenvalue of k given $\omega$. There are some references including analytic solutions to some example problems and some simple pwe code in 1D in the notebooks section as well for comparison.
 
-There are some references including analytic solutions to some example problems and some simple pwe code in 1D in the notebooks section as well for comparison.
+**Advantage 2** No k-space discretization artifacts (i.e. Gibbs Phenomenon)
 
 ## Conventions
 TM polarization: Hz, Ex, Ey (H field out of plane)
