@@ -3,7 +3,10 @@ An objective-oriented approach to finite difference based eigensolving for Maxwe
 
 **Advantage 1** FDFD can solve the $\omega \rightarrow k$ eigenproblem. Plane wave expansion is based on breaking the problem into the Fourier domain. As a result, you cannot solve for the eigenvalue of k given $\omega$. There are some references including analytic solutions to some example problems and some simple pwe code in 1D in the notebooks section as well for comparison.
 
-**Advantage 2** No k-space discretization artifacts (i.e. Gibbs Phenomenon)
+**Advantage 2** Varying levels of abstraction on the dependence of k
+This allows us to solve eigen-problems that pwem cannot, such as 3d waveguides.
+
+**Advantage 3** No k-space discretization artifacts (i.e. Gibbs Phenomenon)
 
 ## Conventions
 TM polarization: Hz, Ex, Ey (H field out of plane)
